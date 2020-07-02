@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand
 from django.utils.timezone import make_aware
 from core.models import Member, ActivityPeriods
 from faker import Faker
+import datetime
 import string
 import random
 
@@ -38,10 +39,8 @@ class Command(BaseCommand):
         queryset = Member.objects.all()
         for user_obj in queryset:
             for i in range(total):
-                st = fake.date_time_this_month()
-                et = fake.date_time_this_month()
-                while st > et:
-                    et = fake.date_time_this_month()
+                st = fake.date_time_this_year()
+                et = st + datetime.timedelta(hours=random.randint(3, 6))
                 activity_detail = {
                     'member_id': user_obj,
                     'start_time': make_aware(st),
