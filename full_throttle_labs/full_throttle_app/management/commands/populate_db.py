@@ -1,0 +1,42 @@
+from django.core.management.base import BaseCommand
+from core.models import Member, ActivityPeriods
+from faker import Faker
+
+
+class Command(BaseCommand):
+    help = 'Create random users'
+
+    def add_arguments(self, parser):
+        parser.add_argument('total', type=int, help='Indicates the number of users to be created')
+
+    def handle(self, *args, **kwargs):
+        total = kwargs['total']
+        fake = Faker()
+        records_user = []
+        records_activity = []
+        for i in range(total):
+            user_detail = {
+                'id': fake.uuid4(),
+                'real_name': fake.name(),
+                'tz': fake.timezone()
+            }
+            record = Member(**user_detail)
+            records_user.append(record)
+        Member.objects.bulk_create(records_user)
+        print("User Records Creation -- Success")
+        queryset = Member.objects.all()
+        for user_obj in queryset:
+            for i in range(total):
+                st = fake.date_time_this_month()
+                et = fake.date_time_this_month()
+                while st > et:
+                    et = fake.date_time_this_month()
+                activity_detail = {
+                    'member_id': user_obj,
+                    'start_time': st,
+                    'end_time': et
+                }
+                activity_record = ActivityPeriods(**activity_detail)
+                records_activity.append(activity_record)
+        ActivityPeriods.objects.bulk_create(records_activity)
+        print("User Activity Records Creation -- Success")
