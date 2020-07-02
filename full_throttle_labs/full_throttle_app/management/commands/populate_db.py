@@ -1,6 +1,16 @@
 from django.core.management.base import BaseCommand
+from django.utils.timezone import make_aware
 from core.models import Member, ActivityPeriods
 from faker import Faker
+import string
+import random
+
+
+def gen_id():
+    res = ''.join(random.choices(string.ascii_uppercase +
+                                 string.digits, k=7))
+    random_id = 'W0' + str(res)
+    return random_id
 
 
 class Command(BaseCommand):
@@ -15,8 +25,9 @@ class Command(BaseCommand):
         records_user = []
         records_activity = []
         for i in range(total):
+            member_id = gen_id()
             user_detail = {
-                'id': fake.uuid4(),
+                'id': member_id,
                 'real_name': fake.name(),
                 'tz': fake.timezone()
             }
@@ -33,8 +44,8 @@ class Command(BaseCommand):
                     et = fake.date_time_this_month()
                 activity_detail = {
                     'member_id': user_obj,
-                    'start_time': st,
-                    'end_time': et
+                    'start_time': make_aware(st),
+                    'end_time': make_aware(et)
                 }
                 activity_record = ActivityPeriods(**activity_detail)
                 records_activity.append(activity_record)
